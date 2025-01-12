@@ -59,11 +59,11 @@ kind: Service
 metadata:
   name: microservice-ui
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: microservice-ui
   ports:
-  - name: grpc
+  - name: http
     port: 80
     targetPort: 80
 ---
