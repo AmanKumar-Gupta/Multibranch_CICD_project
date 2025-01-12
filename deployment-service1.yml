@@ -12,13 +12,6 @@ spec:
       labels:
         app: microservice-ui
     spec:
-      initContainers:
-      - name: wait-for-service-registry
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nslookup service-registry; do echo waiting for service-registry; sleep 2; done;"
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
@@ -141,13 +134,6 @@ spec:
       labels:
         app: api-gateway
     spec:
-      initContainers:
-      - name: wait-for-service-registry
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nslookup service-registry; do echo waiting for service-registry; sleep 2; done;"
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
@@ -209,13 +195,6 @@ spec:
       labels:
         app: product-service
     spec:
-      initContainers:
-      - name: wait-for-service-registry
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nslookup service-registry; do echo waiting for service-registry; sleep 2; done;"
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
@@ -277,13 +256,6 @@ spec:
       labels:
         app: offer-service
     spec:
-      initContainers:
-      - name: wait-for-service-registry
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nslookup service-registry; do echo waiting for service-registry; sleep 2; done;"
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       securityContext:
@@ -345,13 +317,6 @@ spec:
       labels:
         app: rabbitmq
     spec:
-      initContainers:
-      - name: wait-for-service-registry
-        image: busybox
-        command:
-          - sh
-          - -c
-          - "until nslookup service-registry; do echo waiting for service-registry; sleep 2; done;"
       containers:
       - name: rabbitmq
         image: rabbitmq:management
