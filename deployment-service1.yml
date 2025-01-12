@@ -2,69 +2,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: microservice-ui
-spec:
-  selector:
-    matchLabels:
-      app: microservice-ui
-  template:
-    metadata:
-      labels:
-        app: microservice-ui
-    spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-      containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: amankumargupta/microservice-ui:latest
-        ports:
-        - containerPort: 80
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:80"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:80"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: microservice-ui
-spec:
-  type: NodePort
-  selector:
-    app: microservice-ui
-  ports:
-  - name: http
-    port: 80
-    targetPort: 80
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: service-registry
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: service-registry
@@ -73,59 +13,30 @@ spec:
       labels:
         app: service-registry
     spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
       containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: amankumargupta/service-registry:latest
-        ports:
-        - containerPort: 8761
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8761"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8761"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: service-registry
+          image: amankumargupta/service-registry:latest
+          ports:
+            - containerPort: 8761
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: service-registry
 spec:
-  type: ClusterIP
   selector:
     app: service-registry
   ports:
-  - name: grpc
-    port: 8761
-    targetPort: 8761
+    - protocol: TCP
+      port: 8761
+      targetPort: 8761
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: api-gateway
@@ -134,59 +45,31 @@ spec:
       labels:
         app: api-gateway
     spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
       containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: amankumargupta/api-gateway:latest
-        ports:
-        - containerPort: 80
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8000"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8000"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: api-gateway
+          image: amankumargupta/api-gateway:latest
+          ports:
+            - containerPort: 8000
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: api-gateway
 spec:
-  type: ClusterIP
   selector:
     app: api-gateway
   ports:
-  - name: grpc
-    port: 8000
-    targetPort: 8000
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-service
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: product-service
@@ -195,59 +78,30 @@ spec:
       labels:
         app: product-service
     spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
       containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: amankumargupta/product-service:latest
-        ports:
-        - containerPort: 8081
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8081"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8081"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: product-service
+          image: amankumargupta/product-service:latest
+          ports:
+            - containerPort: 8081
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: product-service
 spec:
-  type: ClusterIP
   selector:
     app: product-service
   ports:
-  - name: grpc
-    port: 8081
-    targetPort: 8081
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: offer-service
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: offer-service
@@ -256,59 +110,63 @@ spec:
       labels:
         app: offer-service
     spec:
-      serviceAccountName: default
-      terminationGracePeriodSeconds: 5
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
       containers:
-      - name: server
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: amankumargupta/offer-service:latest
-        ports:
-        - containerPort: 8082
-        readinessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8082"]
-        livenessProbe:
-          periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8082"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: offer-service
+          image: amankumargupta/offer-service:latest
+          ports:
+            - containerPort: 8082
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: offer-service
 spec:
-  type: ClusterIP
   selector:
     app: offer-service
   ports:
-  - name: grpc
-    port: 8082
-    targetPort: 8082
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservice-ui
+  template:
+    metadata:
+      labels:
+        app: microservice-ui
+    spec:
+      containers:
+        - name: microservice-ui
+          image: amankumargupta/microservice-ui:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-ui
+spec:
+  selector:
+    app: microservice-ui
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: rabbitmq
@@ -318,18 +176,10 @@ spec:
         app: rabbitmq
     spec:
       containers:
-      - name: rabbitmq
-        image: rabbitmq:management
-        ports:
-        - containerPort: 15672 # Management UI
-        - containerPort: 5672  # AMQP
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+        - name: rabbitmq
+          image: rabbitmq:alpine
+          ports:
+            - containerPort: 5672
 ---
 apiVersion: v1
 kind: Service
@@ -339,11 +189,6 @@ spec:
   selector:
     app: rabbitmq
   ports:
-    - name: amqp
+    - protocol: TCP
       port: 5672
       targetPort: 5672
-    - name: management
-      port: 15672
-      targetPort: 15672
-
-
